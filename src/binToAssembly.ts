@@ -27,8 +27,21 @@ const mapInstructions = [
   new InstructionCode('ll', '30', '0', FormatInstruction.I),
   new InstructionCode('lui', 'f', '0', FormatInstruction.I),
   new InstructionCode('lw', '23', '0', FormatInstruction.I),
-
-  /** ADD MORE */
+  new InstructionCode('nor', '0', '27', FormatInstruction.I),
+  new InstructionCode('or', '0', '25', FormatInstruction.I),
+  new InstructionCode('ori', 'd', '0', FormatInstruction.I),
+  new InstructionCode('slt', '0', '2a', FormatInstruction.I),
+  new InstructionCode('slti', 'a', '0', FormatInstruction.I),
+  new InstructionCode('sltiu', 'b', '0', FormatInstruction.I),
+  new InstructionCode('sltu', '0', '2b', FormatInstruction.I),
+  new InstructionCode('sll', '0', '00', FormatInstruction.I),
+  new InstructionCode('srl', '0', '02', FormatInstruction.I),
+  new InstructionCode('sb', '28', '0', FormatInstruction.I),
+  new InstructionCode('sc', '38', '0', FormatInstruction.I),
+  new InstructionCode('sh', '29', '0', FormatInstruction.I),
+  new InstructionCode('sw', '2b', '0', FormatInstruction.I),
+  new InstructionCode('sub', '0', '22', FormatInstruction.I),
+  new InstructionCode('subu', '0', '23', FormatInstruction.I)
 ]
 
 /**
@@ -151,6 +164,10 @@ const getTypeInstruction = (i: InstructionCode, opcode: string, func: string): b
   return result
 }
 
+function formatNotFound() {
+  console.log('Format not founded!');
+}
+
 
 export const binToAssembly = (code: string, format: Format, bits: number) => {
   let _bin = code
@@ -187,5 +204,7 @@ export const binToAssembly = (code: string, format: Format, bits: number) => {
     case FormatInstruction.J:
       learnFormatJ(_bin, bits, INSTRUCTION_TYPE)
       break;
+    default:
+      formatNotFound()
   }
 }
