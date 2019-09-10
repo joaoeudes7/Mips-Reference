@@ -1,8 +1,5 @@
-import { binToAssembly, Format } from "./src/binToAssembly";
+import { binToAssembly } from "./src/binToAssembly";
 
-const BIN = "0x21490064"
-const FORMAT = Format.hex
+const INSTRUCTION_CODE = "00000010010100111000100000100010"
 
-const BITS_DEFAULT = 32
-
-binToAssembly(BIN, FORMAT, BITS_DEFAULT)
+binToAssembly(INSTRUCTION_CODE)

@@ -1,18 +1,18 @@
 import { convert, bitsComplete } from './utils';
 
-export enum FormatInstruction {
-    R,
-    I,
-    J
+export enum Format {
+    R = 'R',
+    I = 'I',
+    J = 'J'
 }
 
-export class InstructionCode {
+export class Reference {
     name: string;
     opcode: string;
     func: string;
-    format: FormatInstruction;
+    format: Format;
 
-    constructor(name: string, opcode: string, func: string, format: FormatInstruction) {
+    constructor(name: string, opcode: string, func: string, format: Format) {
         this.name = name;
         this.opcode = opcode;
         this.func = func;

@@ -1,5 +1,6 @@
 import { convert, bitsComplete, subBin, genRegisters } from './utils';
-import { InstructionCode, FormatInstruction } from './InstructionCode';
+import { Reference, Format } from './InstructionCode';
+import { registers, references } from './sets';
 
 /**
  * @author João Eudes Lima<joaoeudes7@gmail.com>
@@ -7,82 +8,31 @@ import { InstructionCode, FormatInstruction } from './InstructionCode';
  * @description Basead in Doc Green Sheet
  */
 
+const BITS_PLATAFORM = 32;
+
 /**
- * - Core Instruction Set
+ * - Core Instruction Set References
  */
-const mapInstructions = [
-  new InstructionCode('add', '0', '20', FormatInstruction.R),
-  new InstructionCode('addi', '8', '0', FormatInstruction.I),
-  new InstructionCode('addiu', '9', '0', FormatInstruction.I),
-  new InstructionCode('addu', '0', '21', FormatInstruction.R),
-  new InstructionCode('and', '0', '24', FormatInstruction.R),
-  new InstructionCode('andi', 'c', '0', FormatInstruction.I),
-  new InstructionCode('beq', '4', '0', FormatInstruction.I),
-  new InstructionCode('bne', '5', '0', FormatInstruction.I),
-  new InstructionCode('j', '2', '0', FormatInstruction.J),
-  new InstructionCode('jal', '3', '0', FormatInstruction.J),
-  new InstructionCode('jr', '0', '8', FormatInstruction.R),
-  new InstructionCode('lbu', '24', '0', FormatInstruction.I),
-  new InstructionCode('lhu', '25', '0', FormatInstruction.I),
-  new InstructionCode('ll', '30', '0', FormatInstruction.I),
-  new InstructionCode('lui', 'f', '0', FormatInstruction.I),
-  new InstructionCode('lw', '23', '0', FormatInstruction.I),
-  new InstructionCode('nor', '0', '27', FormatInstruction.I),
-  new InstructionCode('or', '0', '25', FormatInstruction.I),
-  new InstructionCode('ori', 'd', '0', FormatInstruction.I),
-  new InstructionCode('slt', '0', '2a', FormatInstruction.I),
-  new InstructionCode('slti', 'a', '0', FormatInstruction.I),
-  new InstructionCode('sltiu', 'b', '0', FormatInstruction.I),
-  new InstructionCode('sltu', '0', '2b', FormatInstruction.I),
-  new InstructionCode('sll', '0', '00', FormatInstruction.I),
-  new InstructionCode('srl', '0', '02', FormatInstruction.I),
-  new InstructionCode('sb', '28', '0', FormatInstruction.I),
-  new InstructionCode('sc', '38', '0', FormatInstruction.I),
-  new InstructionCode('sh', '29', '0', FormatInstruction.I),
-  new InstructionCode('sw', '2b', '0', FormatInstruction.I),
-  new InstructionCode('sub', '0', '22', FormatInstruction.I),
-  new InstructionCode('subu', '0', '23', FormatInstruction.I)
-]
+references;
 
 /**
  * - Registers
  */
-const mapRegisters = [
-  '$zero',
-  '$at',
-  ...genRegisters('$v', 0, 1),
-  ...genRegisters('$a', 0, 3),
-  ...genRegisters('$t', 0, 7),
-  ...genRegisters('$s', 0, 7),
-  ...genRegisters('$t', 8, 9),
-  ...genRegisters('$k', 0, 1),
-  '$gp',
-  '$sp',
-  '$fp',
-  '$ra'
-]
+registers;
 
 /**
  * - Instruction Read
- */
-export enum Format {
-  hex,
-  bin
-}
-
-
-/**
  * [OPCODE][RS][RT][RD][SHAMT][FUNC]
  */
-function learnFormatR(bin: string, bits: number, instructionCode: InstructionCode) {
-  const OPCODE = subBin(bin, 31, 26, bits);
-  const RS = subBin(bin, 25, 21, bits)
-  const RT = subBin(bin, 20, 16, bits)
-  const RD = subBin(bin, 15, 11, bits)
+function learnFormatR(bin: string, reference: Reference) {
+  const OPCODE = subBin(bin, 31, 26, BITS_PLATAFORM);
+  const RS = subBin(bin, 25, 21, BITS_PLATAFORM)
+  const RT = subBin(bin, 20, 16, BITS_PLATAFORM)
+  const RD = subBin(bin, 15, 11, BITS_PLATAFORM)
 
   // Offset
-  const SHAMT = subBin(bin, 10, 6, bits)
-  const FUNC = subBin(bin, 5, 0, bits)
+  const SHAMT = subBin(bin, 10, 6, BITS_PLATAFORM)
+  const FUNC = subBin(bin, 5, 0, BITS_PLATAFORM)
 
   console.log(`\n`)
   console.log(`OPCODE: ${OPCODE} {31, 26}`)
@@ -94,11 +44,11 @@ function learnFormatR(bin: string, bits: number, instructionCode: InstructionCod
   console.log(`\n`)
 
   // Convert Registers to Decimal and find in Array
-  const lRS = mapRegisters[convert.bin2dec(RS)]
-  const lRT = mapRegisters[convert.bin2dec(RT)]
-  const lRD = mapRegisters[convert.bin2dec(RD)]
+  const lRS = registers[convert.bin2dec(RS)]
+  const lRT = registers[convert.bin2dec(RT)]
+  const lRD = registers[convert.bin2dec(RD)]
 
-  const codeAssembly = `Instruction: ${instructionCode!.name} ${lRD}, ${lRS}, ${lRT}`
+  const codeAssembly = `Instruction: ${reference!.name} ${lRD}, ${lRS}, ${lRT}`
 
   console.log(codeAssembly)
 }
@@ -106,11 +56,11 @@ function learnFormatR(bin: string, bits: number, instructionCode: InstructionCod
 /**
  * [OPCODE][RS][RT][RD][SHAMT][FUNC]
  */
-function learnFormatI(bin: string, bits: number, instructionCode: InstructionCode) {
-  const OPCODE = subBin(bin, 31, 26, bits)
-  const RS = subBin(bin, 25, 21, bits)
-  const RT = subBin(bin, 20, 16, bits)
-  const IMMEDIATE = subBin(bin, 15, 0, bits)
+function learnFormatI(bin: string, instructionCode: Reference) {
+  const OPCODE = subBin(bin, 31, 26, BITS_PLATAFORM)
+  const RS = subBin(bin, 25, 21, BITS_PLATAFORM)
+  const RT = subBin(bin, 20, 16, BITS_PLATAFORM)
+  const IMMEDIATE = subBin(bin, 15, 0, BITS_PLATAFORM)
 
   console.log(`\n`)
   console.log(`OPCODE: ${OPCODE} {31, 26}`)
@@ -120,8 +70,8 @@ function learnFormatI(bin: string, bits: number, instructionCode: InstructionCod
   console.log(`\n`)
 
   // Convert Registers to Decimal and find in Array
-  const lRS = mapRegisters[convert.bin2dec(RS)]
-  const lRT = mapRegisters[convert.bin2dec(RT)]
+  const lRS = registers[convert.bin2dec(RS)]
+  const lRT = registers[convert.bin2dec(RT)]
   const lIMMEDIATE = convert.bin2dec(IMMEDIATE)
 
   const codeAssembly = `Instruction: ${instructionCode!.name} ${lRT}, ${lRS}, ${lIMMEDIATE}`
@@ -132,9 +82,9 @@ function learnFormatI(bin: string, bits: number, instructionCode: InstructionCod
 /**
  * [OPCODE][ANDRESS]
  */
-function learnFormatJ(bin: string, bits: number, instructionCode: InstructionCode) {
-  const OPCODE = subBin(bin, 31, 26, bits)
-  const ADDRESS = subBin(bin, 25, 0, bits)
+function learnFormatJ(bin: string, instructionCode: Reference) {
+  const OPCODE = subBin(bin, 31, 26, BITS_PLATAFORM)
+  const ADDRESS = subBin(bin, 25, 0, BITS_PLATAFORM)
 
   console.log(`\n`)
   console.log(`OPCODE: ${OPCODE} {31, 26}`)
@@ -151,60 +101,67 @@ function learnFormatJ(bin: string, bits: number, instructionCode: InstructionCod
 /**
  * - Logic to identify Instruction
  */
-const getTypeInstruction = (i: InstructionCode, opcode: string, func: string): boolean => {
-  const isOp = i.opBin == opcode;
-  const isFormatR = i.format == FormatInstruction.R;
+function setFilter(reference: Reference, opcode: string, func: string) {
+  const isOp = reference.opBin == opcode;
+  const isFormatR = reference.format == Format.R;
 
   let result = isOp;
 
   if (isOp && isFormatR) {
-    result = i.funcBin == func
+    result = reference.funcBin == func
   }
 
   return result
+}
+
+export enum FormatCode {
+  hex = 'hex',
+  bin = 'bin'
+}
+
+function getTypeCode(code: string) {
+  const isHex = RegExp('0[xX][0-9a-fA-F]+').test(code)
+
+  return isHex ? FormatCode.hex : FormatCode.bin
 }
 
 function formatNotFound() {
   console.log('Format not founded!');
 }
 
+function typeCodeUndefined() {
+  console.log('Type of Code is Undefined')
+}
 
-export const binToAssembly = (code: string, format: Format, bits: number) => {
+export function binToAssembly(code: string) {
   let _bin = code
   let _hex = code
 
-  if (format === Format.hex) {
-    _bin = convert.hex2bin(code)
-  } else {
-    _hex = convert.bin2hex(code)
+  const actionCode = {
+    'bin': () => _hex = convert.bin2hex(code),
+    'hex': () => _bin = convert.hex2bin(code)
   }
 
-  _bin = bitsComplete(_bin, bits)
+  actionCode[getTypeCode(code)]()
+
+  _bin = bitsComplete(_bin, BITS_PLATAFORM)
 
   console.log(`Hex: ${_hex}`)
   console.log(`Bin: ${_bin}`)
   console.log(`Size: ${_bin.length}`);
 
-  const OPCODE = subBin(_bin, 31, 26, bits);
-  const FUNC = subBin(_bin, 5, 0, bits)
+  const OPCODE = subBin(_bin, 31, 26, BITS_PLATAFORM);
+  const FUNC = subBin(_bin, 5, 0, BITS_PLATAFORM)
 
-  const INSTRUCTION_TYPE = mapInstructions.find(i => {
-    return getTypeInstruction(i, OPCODE, FUNC)
-  })!;
+  const SET = references.find(set => setFilter(set, OPCODE, FUNC))!;
 
-  console.log(`FORMAT: ${INSTRUCTION_TYPE.format}`)
+  console.log(`FORMAT: ${SET.format}`)
 
-  switch (INSTRUCTION_TYPE.format) {
-    case FormatInstruction.R:
-      learnFormatR(_bin, bits, INSTRUCTION_TYPE)
-      break;
-    case FormatInstruction.I:
-      learnFormatI(_bin, bits, INSTRUCTION_TYPE)
-      break;
-    case FormatInstruction.J:
-      learnFormatJ(_bin, bits, INSTRUCTION_TYPE)
-      break;
-    default:
-      formatNotFound()
+  const actionFormat = {
+    'R': learnFormatR,
+    'I': learnFormatI,
+    'J': learnFormatJ
   }
+
+  actionFormat[SET.format](_bin, SET)
 }
